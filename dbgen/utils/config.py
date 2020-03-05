@@ -16,8 +16,8 @@ def load_configuration() -> argparse.Namespace:
     parser.add_argument("-p", "--password", help="Password for running mongo.", required=True)
     parser.add_argument("-t", "--task", help="Task to perform.", required=True,
                         default="import", choices=['import', 'export', 'query'])
-    parser.add_argument("-s", "--tables", help="Species name.", required=False, default="Staphylococcus Aureus")
-    parser.add_argument("--tables-dir", help="Species directory.", required=False, default="./bacteria/staphylococcus-aureus")
+    parser.add_argument("-s", "--species", help="Species name.", required=False, default="Staphylococcus Aureus")
+    parser.add_argument("--species-dir", help="Species directory.", required=False, default="./bacteria/staphylococcus-aureus")
     parser.add_argument("-d", "--dataset", help="Dataset to add.", required=False, default="all")
     args = parser.parse_args()
 

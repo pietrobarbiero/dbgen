@@ -1,9 +1,11 @@
-from .dataset import Dataset
 from .species import Species
+from .dataset import Dataset
 from .sample import Sample
+from .phenotype import Phenotype
 
 __all__ = [
-    'Dataset',
     'Species',
-    'Sample'
+    'Dataset',
+    'Sample',
+    'Phenotype',
 ]

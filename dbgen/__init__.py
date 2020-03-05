@@ -1,6 +1,6 @@
 from ._version import __version__
 from . import dbgen
-from .config.load_config import load_configuration
+from .utils.config import load_configuration
 
 __all__ = [
     'dbgen',

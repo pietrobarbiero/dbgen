@@ -1,6 +1,8 @@
-from mongoengine import Document, StringField, ListField, ReferenceField
+import traceback
 
-from dbgen.tables.dataset import Dataset
+from mongoengine import Document, StringField, ListField, ReferenceField, errors
+
+from .dataset import Dataset
 
 
 class Species(Document):
@@ -11,3 +13,10 @@ class Species(Document):
     # @queryset_manager
     # def objects(doc_cls, queryset):
     #     return queryset.order_by('-name')
+
+
+def import_data(configs):
+    try:
+        Species.objects(name=configs.species).update_one(set__name=configs.species, upsert=True)
+    except errors.ValidationError:
+        print(traceback.format_exc())
