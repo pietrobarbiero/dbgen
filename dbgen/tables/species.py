@@ -1,6 +1,6 @@
 import traceback
 
-from mongoengine import Document, StringField, ListField, ReferenceField, errors
+from mongoengine import Document, StringField, ListField, ReferenceField, errors, queryset_manager
 
 from .dataset import Dataset
 
@@ -10,9 +10,16 @@ class Species(Document):
     # datasets = EmbeddedDocumentListField(Dataset, default=[])
     datasets = ListField(ReferenceField(Dataset))
 
-    # @queryset_manager
-    # def objects(doc_cls, queryset):
-    #     return queryset.order_by('-name')
+    @queryset_manager
+    def get_by_name(doc_cls, queryset, species_name):
+        return queryset.filter(name=species_name).first()
+
+    @queryset_manager
+    def get_dataset(doc_cls, queryset, species_name, dataset_name):
+        sp = doc_cls.get_by_name(species_name)
+        for dataset in sp.datasets:
+            if dataset.name == dataset_name:
+                return dataset
 
 
 def import_data(configs):
