@@ -10,7 +10,8 @@ def main():
     except:
         pass
 
-    configs = dbgen.start_db()
+    configs = dbgen.load_cfg()
+    dbgen.start_db(configs)
     dbgen.drop_db()
     dbgen.print_db()
 

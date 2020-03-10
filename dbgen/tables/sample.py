@@ -1,3 +1,4 @@
+import os
 import traceback
 
 import pandas as pd
@@ -59,19 +60,22 @@ def _to_df_url(s: Sample):
     return df
 
 
-def import_data(species_name, dataset_names, dataset_years, dataset_files):
+def import_data(configs, dataset_names, dataset_years, dataset_files):
     for dname, dyear, dpath in zip(dataset_names, dataset_years, dataset_files):
         df = pd.read_csv(dpath, sep="\t")
         df.dropna(axis=0, inplace=True, how="all")
         for _, row in df.iterrows():
             run_accession = row[2]
             download_urls = row[1].split(";")
+            base_id = run_accession[:6]
+            fastq_path = os.path.join(configs.fastq_dir, base_id, run_accession)
             try:
-                sp = species.Species.objects(pk=species_name).first()
+                sp = species.Species.objects(pk=configs.species).first()
                 dt = dataset.Dataset.objects(pk=dname).first()
                 Sample.objects(run_accession=run_accession). \
                     update_one(set__run_accession=run_accession, set__download_urls=download_urls,
-                               set__species=sp, set__dataset=dt, upsert=True)
+                               set__species=sp, set__dataset=dt, set__fastq_directory=fastq_path,
+                               upsert=True)
                 dataset.Dataset.objects(pk=dname).update(add_to_set__samples__=run_accession)
             except errors.ValidationError:
                 continue

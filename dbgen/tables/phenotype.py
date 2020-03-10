@@ -2,7 +2,6 @@ import traceback
 
 import pandas as pd
 from mongoengine import Document, StringField, errors, ReferenceField, queryset_manager
-from pandas import DataFrame
 
 from . import sample, dataset, species
 
@@ -52,7 +51,7 @@ def _to_df(ph: Phenotype):
     return df
 
 
-def import_data(species_name, dataset_names, dataset_years, dataset_files):
+def import_data(configs, dataset_names, dataset_years, dataset_files):
     for dname, dyear, dpath in zip(dataset_names, dataset_years, dataset_files):
         df = pd.read_csv(dpath, sep="\t")
         df.dropna(axis=0, inplace=True, how="all")
@@ -62,7 +61,7 @@ def import_data(species_name, dataset_names, dataset_years, dataset_files):
                 if pname not in ["ENA project", "Fastq reads", "Run accession"]:
                     try:
                         s = sample.Sample.objects(pk=run_accession).first()
-                        sp = species.Species.objects(pk=species_name).first()
+                        sp = species.Species.objects(pk=configs.species).first()
                         dt = dataset.Dataset.objects(pk=dname).first()
                         Phenotype.objects(sample=run_accession, name=pname).\
                             update_one(set__name=pname, set__phenotype=phenotype,
