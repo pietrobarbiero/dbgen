@@ -1,16 +1,30 @@
 import traceback
+from argparse import Namespace
+from typing import List, Set
 
 import pandas as pd
-from mongoengine import Document, StringField, errors, ReferenceField, queryset_manager
+from mongoengine import Document, StringField, errors, ReferenceField, queryset_manager, QuerySet
 
 from . import sample, dataset, species
+from ..utils.config import _options
 
 PHENOTYPE = (('R', 'Resistant'),
-            ('S', 'Susceptible'),
-            ('I', 'Intermediate'))
+             ('S', 'Susceptible'),
+             ('I', 'Intermediate'))
 
 
 class Phenotype(Document):
+    """
+    Phenotype
+
+    Attributes
+    ----------
+    :param name: name (e.g. substance name or phenotype name)
+    :param phenotype: corresponding phenotype (e.g. resistant/susceptible to a substance)
+    :param sample: reference the corresponding sample
+    :param dataset: reference the corresponding dataset
+    :param species: reference the corresponding species
+    """
     name = StringField(max_length=200, required=True, unique_with='sample')
     phenotype = StringField(max_length=3, required=True, choices=PHENOTYPE)
     sample = ReferenceField('Sample', required=True, unique_with='name')
@@ -18,19 +32,16 @@ class Phenotype(Document):
     species = ReferenceField('Species', required=True)
 
     @queryset_manager
-    def get_phenotypes(doc_cls, queryset, species_name=None, phenotype_name=None, dataset_name=None):
-        if species_name and phenotype_name and dataset_name:
-            s = species.Species.objects(name=species_name).first()
-            d = dataset.Dataset.objects(name=dataset_name).first()
-            data = queryset.filter(species=s, dataset=d, name=phenotype_name)
-        elif (not species_name) and phenotype_name and dataset_name:
-            d = dataset.Dataset.objects(name=dataset_name).first()
-            data = queryset.filter(dataset=d, name=phenotype_name)
-        elif species_name and phenotype_name and (not dataset_name):
-            s = species.Species.objects(name=species_name).first()
-            data = queryset.filter(species=s, name=phenotype_name)
-        else:
-            return pd.DataFrame()
+    def get_phenotypes(doc_cls, queryset: QuerySet,
+                       species_name=None, dataset_name=None, phenotype_name=None) -> pd.DataFrame:
+        """
+        Get samples' phenotypes
+
+        :param species_name: name of the species
+        :param dataset_name: name of the dataset
+        :param phenotype_name: name of the phenotype
+    """
+        data = _options(queryset, species_name, dataset_name, phenotype_name)
         df = pd.DataFrame()
         for d in data:
             ds = _to_df(d)
@@ -38,12 +49,13 @@ class Phenotype(Document):
         return df
 
     @queryset_manager
-    def get_phenotype_names(doc_cls, queryset, species_name=None):
-        if species_name:
-            s = species.Species.objects(name=species_name).first()
-            data = queryset.filter(species=s)
-        else:
-            return pd.DataFrame()
+    def get_phenotype_names(doc_cls, queryset: QuerySet, species_name=None) -> Set:
+        """
+        Get all phenotype names available for a specific species
+
+        :param species_name: name of the species
+    """
+        data = _options(queryset, species_name)
         names = set()
         for d in data:
             names.add(d.name)
@@ -56,7 +68,17 @@ def _to_df(ph: Phenotype):
     return df
 
 
-def import_data(configs, dataset_names, dataset_years, dataset_files):
+def import_data(configs: Namespace, dataset_names: List, dataset_years: List, dataset_files: List):
+    """
+    Import new phenotypes
+
+    Parameters
+    ----------
+    :param configs: configuration parameters
+    :param dataset_names: list of dataset names (e.g. names of the corresponding publications)
+    :param dataset_years: list of publication year
+    :param dataset_files: list of dataset file path
+    """
     for dname, dyear, dpath in zip(dataset_names, dataset_years, dataset_files):
         df = pd.read_csv(dpath, sep="\t")
         df.dropna(axis=0, inplace=True, how="all")
@@ -68,7 +90,7 @@ def import_data(configs, dataset_names, dataset_years, dataset_files):
                         s = sample.Sample.objects(run_accession=run_accession).first()
                         sp = species.Species.objects(name=configs.species).first()
                         dt = dataset.Dataset.objects(name=dname).first()
-                        Phenotype.objects(sample=s, name=pname).\
+                        Phenotype.objects(sample=s, name=pname). \
                             update_one(set__name=pname, set__phenotype=phenotype,
                                        set__sample=s, set__species=sp,
                                        set__dataset=dt, upsert=True)

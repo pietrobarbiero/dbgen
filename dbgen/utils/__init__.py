@@ -1,7 +1,7 @@
-from .config import load_configuration
+from .config import _load_configuration
 from .parser import parse_ast
 
 __all__ = [
-    'load_configuration',
+    '_load_configuration',
     'parse_ast',
 ]

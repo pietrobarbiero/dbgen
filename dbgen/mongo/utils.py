@@ -1,8 +1,16 @@
 import os
 import traceback
+from argparse import Namespace
 
 
-def mongo_start(configs):
+def mongo_start(configs: Namespace):
+    """
+    Start mongoDB service
+
+    Parameters
+    ----------
+    :param configs: configuration parameters
+    """
     if configs.password:
         try:
             command = 'sudo service mongod start'
@@ -12,7 +20,14 @@ def mongo_start(configs):
             print(traceback.format_exc())
 
 
-def mongo_shutdown(configs):
+def mongo_shutdown(configs: Namespace):
+    """
+    Shutdown mongoDB service
+
+    Parameters
+    ----------
+    :param configs: configuration parameters
+    """
     if configs.password:
         try:
             command = 'sudo service mongod stop'

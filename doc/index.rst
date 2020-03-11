@@ -1,52 +1,89 @@
-.. project-template documentation master file, created by
-   sphinx-quickstart on Mon Jan 18 14:44:12 2016.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+Welcome to DBGen
+===================
 
-Welcome to sklearn-template's documentation!
-============================================
 
-This project is a reference implementation to anyone who wishes to develop
-scikit-learn compatible classes.
+|Build|
+|Coverage|
+
+|PyPI license|
+|PyPI-version|
+
+
+
+.. |Build| image:: https://img.shields.io/travis/pietrobarbiero/dbgen?label=Master%20Build&style=for-the-badge
+    :alt: Travis (.org)
+    :target: https://travis-ci.org/glubbdubdrib/lazygrid
+
+.. |Coverage| image:: https://img.shields.io/codecov/c/gh/pietrobarbiero/dbgen?label=Test%20Coverage&style=for-the-badge
+    :alt: Codecov
+    :target: https://codecov.io/gh/glubbdubdrib/lazygrid
+
+.. |Docs| image:: https://img.shields.io/readthedocs/pietrobarbiero/dbgen?style=for-the-badge
+    :alt: Read the Docs (version)
+    :target: https://lazygrid.readthedocs.io/en/latest/
+
+.. |PyPI license| image:: https://img.shields.io/pypi/l/dbgen.svg?style=for-the-badge
+   :target: https://pypi.python.org/pypi/dbgen/
+
+.. |PyPI-version| image:: https://img.shields.io/pypi/v/dbgen?style=for-the-badge
+    :alt: PyPI
+    :target: https://pypi.python.org/pypi/dbgen/
+
+
+DBGen is a python package providing general purpose database
+to support genomic data analysis studies.
+
+The current implementation is based on mongoDB.
+
+Quick start
+-----------
+
+You can install DBGen along with all its dependencies from
+`PyPI <https://pypi.org/project/dbgen/>`__:
+
+.. code:: bash
+
+    $ pip install -r requirements.txt dbgen
+
+Source
+------
+
+The source code and minimal working examples can be found on
+`GitHub <https://github.com/pietrobarbiero/dbgen>`__.
+
 
 .. toctree::
-   :maxdepth: 2
-   :hidden:
-   :caption: Getting Started
+    :caption: User Guide
+    :maxdepth: 2
 
-   quick_start
-
-.. toctree::
-   :maxdepth: 2
-   :hidden:
-   :caption: Documentation
-
-   user_guide
-   api
+    user_guide/installation
+    user_guide/tutorial
+    user_guide/contributing
+    user_guide/running_tests
 
 .. toctree::
-   :maxdepth: 2
-   :hidden:
-   :caption: Tutorial - Examples
+    :caption: API Reference
+    :maxdepth: 2
 
-   auto_examples/index
+    modules/dbgen
+    modules/tables/species
+    modules/tables/dataset
+    modules/tables/sample
+    modules/tables/phenotype
+    modules/tables/result
 
-`Getting started <quick_start.html>`_
--------------------------------------
 
-Information regarding this template and how to modify it for your own project.
+.. toctree::
+    :caption: Copyright
+    :maxdepth: 1
 
-`User Guide <user_guide.html>`_
--------------------------------
+    user_guide/authors
+    user_guide/licence
 
-An example of narrative documentation.
 
-`API Documentation <api.html>`_
--------------------------------
+Indices and tables
+~~~~~~~~~~~~~~~~~~
 
-An example of API documentation.
-
-`Examples <auto_examples/index.html>`_
---------------------------------------
-
-A set of examples. It complements the `User Guide <user_guide.html>`_.
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

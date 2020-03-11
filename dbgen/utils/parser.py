@@ -1,8 +1,18 @@
 import json
 import os
+from argparse import Namespace
+from typing import Tuple, List
 
 
-def parse_ast(configs):
+def parse_ast(configs: Namespace) -> Tuple[List, List, List]:
+    """
+    Parse AST-like files
+
+    Parameters
+    ----------
+    :param configs: configuration parameters
+    :return: dataset name, year, and file paths
+    """
     dataset_names = []
     dataset_years = []
     dataset_files = []

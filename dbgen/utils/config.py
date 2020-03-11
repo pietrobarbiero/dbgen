@@ -1,9 +1,14 @@
 import argparse
 
+import pandas as pd
+from mongoengine import QuerySet
 
-def load_configuration() -> argparse.Namespace:
+from ..tables import species, dataset
+
+
+def _load_configuration() -> argparse.Namespace:
     """
-    Load run parameters from .ini configuration file.
+    Parse command line arguments.
 
     Parameters
     ----------
@@ -20,3 +25,44 @@ def load_configuration() -> argparse.Namespace:
     args = parser.parse_args()
 
     return args
+
+
+def _options(queryset: QuerySet, species_name: str = None, dataset_name: str = None, phenotype_name: str = None):
+    """
+    Filter query according to the provided parameters
+
+    :param queryset: current objects to be filtered
+    :param species_name: species name
+    :param dataset_name: dataset name
+    :param phenotype_name: phenotype name
+    """
+    if species_name and phenotype_name and dataset_name:
+        s = species.Species.objects(name=species_name).first()
+        d = dataset.Dataset.objects(name=dataset_name).first()
+        data = queryset.filter(species=s, dataset=d, name=phenotype_name)
+
+    elif species_name and dataset_name and (not phenotype_name):
+        s = species.Species.objects(name=species_name).first()
+        d = dataset.Dataset.objects(name=dataset_name).first()
+        data = queryset.filter(species=s, dataset=d)
+
+    elif (not species_name) and phenotype_name and dataset_name:
+        d = dataset.Dataset.objects(name=dataset_name).first()
+        data = queryset.filter(dataset=d, name=phenotype_name)
+
+    elif species_name and phenotype_name and (not dataset_name):
+        s = species.Species.objects(name=species_name).first()
+        data = queryset.filter(species=s, name=phenotype_name)
+
+    elif species_name and (not phenotype_name) and (not dataset_name):
+        s = species.Species.objects(name=species_name).first()
+        data = queryset.filter(species=s)
+
+    elif dataset_name and (not phenotype_name) and (not species_name):
+        d = dataset.Dataset.objects(name=dataset_name).first()
+        data = queryset.filter(dataset=d)
+
+    else:
+        return pd.DataFrame()
+
+    return data
