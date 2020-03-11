@@ -35,7 +35,7 @@ def main():
         version = "0.0.1"
         date = "2019-09-02"
         parameters = "-c 20 -v 39"
-        file_path = os.path.join(root_path, "testfile.txt")
+        file_path = os.path.join(root_path, "testfile_%s.txt" % v["run_accession"])
         raw_result = open(file_path, "w")
         raw_result.write("Hello %s" % v["run_accession"])
         raw_result.write("This is our new text file")
