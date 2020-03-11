@@ -9,12 +9,12 @@ class Test(unittest.TestCase):
 
         configs = dbgen.load_cfg()
         dbgen.start_db(configs)
-        # dbgen.drop_db()
-        # dbgen.print_db()
+        dbgen.drop_db()
+        dbgen.print_db()
 
         dbgen.connect_db()
-        # dbgen.import_data(configs)
-        # dbgen.print_db()
+        dbgen.import_data(configs)
+        dbgen.print_db()
 
         s1 = dbgen.Sample.get_raw_data(species_name="Species 1", dataset_name="Species_Name_2009_AuthorName")
         s2 = dbgen.Sample.get_raw_data(dataset_name="Species_Name_2009_AuthorName")
