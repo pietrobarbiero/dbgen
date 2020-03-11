@@ -5,7 +5,6 @@ import unittest
 class Test(unittest.TestCase):
     def test_dbgen(self):
         import os
-        import sys
         import dbgen
 
         configs = dbgen.load_cfg()
@@ -17,13 +16,14 @@ class Test(unittest.TestCase):
         dbgen.import_data(configs)
         dbgen.print_db()
 
-        s1 = dbgen.Sample.get_raw_data(species_name="Staphylococcus Aureus", dataset_name="S_aureus_2014_Everitt")
-        s2 = dbgen.Sample.get_raw_data(dataset_name="S_aureus_2014_Everitt")
-        u2 = dbgen.Sample.get_download_urls(dataset_name="S_aureus_2014_Everitt")
-        p0 = dbgen.Phenotype.get_phenotype_names(species_name="Staphylococcus Aureus")
-        p1 = dbgen.Phenotype.get_phenotypes(species_name="Staphylococcus Aureus", phenotype_name="Mupirocin")
-        p2 = dbgen.Phenotype.get_phenotypes(dataset_name="S_aureus_2014_Everitt", phenotype_name="Mupirocin")
-        p3 = dbgen.Phenotype.get_phenotypes(species_name="Staphylococcus Aureus", dataset_name="S_aureus_2014_Everitt",
+        s1 = dbgen.Sample.get_raw_data(species_name="Species 1", dataset_name="Species_Name_2009_AuthorName")
+        s2 = dbgen.Sample.get_raw_data(dataset_name="Species_Name_2009_AuthorName")
+        u2 = dbgen.Sample.get_download_urls(dataset_name="Species_Name_2009_AuthorName")
+        p0 = dbgen.Phenotype.get_phenotype_names(species_name="Species 1")
+        p1 = dbgen.Phenotype.get_phenotypes(species_name="Species 1", phenotype_name="Mupirocin")
+        p2 = dbgen.Phenotype.get_phenotypes(dataset_name="Species_Name_2009_AuthorName", phenotype_name="Mupirocin")
+        p3 = dbgen.Phenotype.get_phenotypes(species_name="Species 1",
+                                            dataset_name="Species_Name_2009_AuthorName",
                                             phenotype_name="Mupirocin")
 
         root_path = "./test/data/db/cooked/"
@@ -46,8 +46,17 @@ class Test(unittest.TestCase):
             dbgen.Sample.save_result(k, tool_name, version,
                                      date, parameters, raw_result_path)
 
-        res0 = dbgen.Sample.get_results(species_name="Staphylococcus Aureus", dataset_name="S_aureus_2014_Everitt")
-        res1 = dbgen.Sample.get_results(species_name="Staphylococcus Aureus")
+        res0 = dbgen.Sample.get_results(species_name="Species 1", dataset_name="Species_Name_2009_AuthorName")
+        res1 = dbgen.Sample.get_results(species_name="Species 1")
+
+        self.assertTrue(len(p0) == 23)
+        self.assertTrue(p1.shape == (282, 3))
+        self.assertTrue(p2.shape == (92, 3))
+        self.assertTrue(p3.shape == (92, 3))
+        self.assertTrue(s1.shape == (92, 4))
+        self.assertTrue(s2.shape == (92, 4))
+        self.assertTrue(res0.shape == (92, 8))
+        self.assertTrue(res1.shape == (92, 8))
 
         dbgen.shutdown_db(configs)
 
