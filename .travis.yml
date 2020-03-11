@@ -38,7 +38,7 @@ install:
 #  - cd for_test
 #  - pytest -v --cov=dbgen --pyargs dbgen
 script:
-  - coverage run -m unittest test/test_dbgen.py || python3 -m unittest test/test_dbgen.py || python -m unittest test/test_dbgen.py
+  - coverage run -m unittest || python3 -m unittest || python -m unittest
 
 after_success:
   - codecov
