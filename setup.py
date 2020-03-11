@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-"""A template for scikit-learn compatible packages."""
+"""General purpose database for genomics."""
 
 import codecs
 import os
@@ -12,16 +12,16 @@ with open(ver_file) as f:
     exec(f.read())
 
 DISTNAME = 'dbgen'
-DESCRIPTION = 'Database for genetics.'
-with codecs.open('README.rst', encoding='utf-8-sig') as f:
+DESCRIPTION = 'Database for genomics.'
+with codecs.open('README.md', encoding='utf-8-sig') as f:
     LONG_DESCRIPTION = f.read()
 MAINTAINER = 'P. Barbiero'
-MAINTAINER_EMAIL = 'pietro.barbiero@protonmail.com'
+MAINTAINER_EMAIL = 'barbiero@tutanota.com'
 URL = 'https://github.com/pietrobarbiero/dbgen'
-LICENSE = 'new BSD'
+LICENSE = 'Apache 2.0'
 DOWNLOAD_URL = 'https://github.com/pietrobarbiero/dbgen.git'
 VERSION = __version__
-INSTALL_REQUIRES = ['numpy', 'scipy']
+INSTALL_REQUIRES = ['numpy', 'scipy', 'pymongo', 'mongoengine', 'pandas']
 CLASSIFIERS = ['Intended Audience :: Science/Research',
                'Intended Audience :: Developers',
                'License :: OSI Approved',

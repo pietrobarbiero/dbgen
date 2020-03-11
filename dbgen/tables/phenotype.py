@@ -20,11 +20,15 @@ class Phenotype(Document):
     @queryset_manager
     def get_phenotypes(doc_cls, queryset, species_name=None, phenotype_name=None, dataset_name=None):
         if species_name and phenotype_name and dataset_name:
-            data = queryset.filter(species=species_name, name=phenotype_name, dataset=dataset_name)
+            s = species.Species.objects(name=species_name).first()
+            d = dataset.Dataset.objects(name=dataset_name).first()
+            data = queryset.filter(species=s, dataset=d, name=phenotype_name)
         elif (not species_name) and phenotype_name and dataset_name:
-            data = queryset.filter(name=phenotype_name, dataset=dataset_name)
+            d = dataset.Dataset.objects(name=dataset_name).first()
+            data = queryset.filter(dataset=d, name=phenotype_name)
         elif species_name and phenotype_name and (not dataset_name):
-            data = queryset.filter(species=species_name, name=phenotype_name)
+            s = species.Species.objects(name=species_name).first()
+            data = queryset.filter(species=s, name=phenotype_name)
         else:
             return pd.DataFrame()
         df = pd.DataFrame()
@@ -36,7 +40,8 @@ class Phenotype(Document):
     @queryset_manager
     def get_phenotype_names(doc_cls, queryset, species_name=None):
         if species_name:
-            data = queryset.filter(species=species_name)
+            s = species.Species.objects(name=species_name).first()
+            data = queryset.filter(species=s)
         else:
             return pd.DataFrame()
         names = set()
@@ -60,15 +65,15 @@ def import_data(configs, dataset_names, dataset_years, dataset_files):
             for pname, phenotype in row.items():
                 if pname not in ["ENA project", "Fastq reads", "Run accession"]:
                     try:
-                        s = sample.Sample.objects(pk=run_accession).first()
-                        sp = species.Species.objects(pk=configs.species).first()
-                        dt = dataset.Dataset.objects(pk=dname).first()
-                        Phenotype.objects(sample=run_accession, name=pname).\
+                        s = sample.Sample.objects(run_accession=run_accession).first()
+                        sp = species.Species.objects(name=configs.species).first()
+                        dt = dataset.Dataset.objects(name=dname).first()
+                        Phenotype.objects(sample=s, name=pname).\
                             update_one(set__name=pname, set__phenotype=phenotype,
                                        set__sample=s, set__species=sp,
                                        set__dataset=dt, upsert=True)
-                        p = Phenotype.objects(sample=run_accession, name=pname).first()
-                        sample.Sample.objects(pk=run_accession).update(add_to_set__phenotypes__=p.pk)
+                        p = Phenotype.objects(sample=s, name=pname).first()
+                        sample.Sample.objects(run_accession=run_accession).update(add_to_set__phenotypes__=p)
                     except errors.ValidationError:
                         continue
                         # print(traceback.format_exc())

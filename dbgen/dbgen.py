@@ -46,8 +46,8 @@ def print_db():
             d = dataset.Dataset.objects(pk=dref.id).first()
             if d is not None:
                 print("\t%s (%d)" % (d.name, len(d.samples)))
-                # for sref in d.samples:
-                #     s = sample.Sample.objects(pk=sref.id).first()
-                #     if s is not None:
-                #         phenotypes = ["{%s: %s}" % (p.name, p.phenotype) for p in s.phenotypes]
-                #         print("\t\t%s %s" % (s.run_accession, phenotypes))
+                for sref in d.samples:
+                    s = sample.Sample.objects(pk=sref.id).first()
+                    if s is not None:
+                        phenotypes = ["{%s: %s}" % (p.name, p.phenotype) for p in s.phenotypes]
+                        print("\t\t%s %s" % (s.run_accession, phenotypes))
