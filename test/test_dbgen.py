@@ -26,7 +26,7 @@ class Test(unittest.TestCase):
         p3 = dbgen.Phenotype.get_phenotypes(species_name="Staphylococcus Aureus", dataset_name="S_aureus_2014_Everitt",
                                             phenotype_name="Mupirocin")
 
-        root_path = "./data/db/cooked/"
+        root_path = "./test/data/db/cooked/"
         if not os.path.exists(root_path):
             os.makedirs(root_path)
         for k, v in s1.iterrows():
