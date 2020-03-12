@@ -2,7 +2,7 @@ from argparse import Namespace
 
 from mongoengine import connect
 
-from .utils import _load_configuration, parse_ast
+from .utils import _load_configuration, _load_sources
 from .mongo import mongo_start, mongo_shutdown
 from .tables import species, dataset, sample, phenotype
 
@@ -27,11 +27,15 @@ def start_db(configs: Namespace):
     mongo_start(configs)
 
 
-def connect_db():
+def connect_db(configs: Namespace):
     """
     Connect to default database
+
+    Parameters
+    ----------
+    :param configs: configuration parameters
     """
-    db = connect('dbgen_test', host='localhost', port=27017)
+    db = connect(configs.database, host=configs.host, port=configs.port)
 
 
 def shutdown_db(configs: Namespace):
@@ -45,12 +49,16 @@ def shutdown_db(configs: Namespace):
     mongo_shutdown(configs)
 
 
-def drop_db():
+def drop_db(configs):
     """
     Drop default database
+
+    Parameters
+    ----------
+    :param configs: configuration parameters
     """
-    db = connect('dbgen_test', host='localhost', port=27017)
-    db.drop_database('dbgen_test')
+    db = connect(configs.database, host=configs.host, port=configs.port)
+    db.drop_database(configs.database)
 
 
 def import_data(configs: Namespace):
@@ -61,14 +69,7 @@ def import_data(configs: Namespace):
     ----------
     :param configs: configuration parameters
     """
-    # parse phenotype
-    dataset_names, dataset_years, dataset_files = parse_ast(configs)
-
-    # import data
-    species.import_data(configs)
-    dataset.import_data(configs, dataset_names, dataset_years, dataset_files)
-    sample.import_data(configs, dataset_names, dataset_years, dataset_files)
-    phenotype.import_data(configs, dataset_names, dataset_years, dataset_files)
+    _load_sources(configs)
 
 
 def print_db():

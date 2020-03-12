@@ -1,5 +1,4 @@
 import traceback
-from argparse import Namespace
 
 from mongoengine import Document, StringField, ListField, ReferenceField, errors, queryset_manager
 
@@ -19,15 +18,15 @@ class Species(Document):
     datasets = ListField(ReferenceField(Dataset))
 
 
-def import_data(configs: Namespace):
+def import_data(species_name: str):
     """
     Import a new species
 
     Parameters
     ----------
-    :param configs: configuration parameters
+    :param species_name: species name
     """
     try:
-        Species.objects(name=configs.species).update_one(set__name=configs.species, upsert=True)
+        Species.objects(name=species_name).update_one(set__name=species_name, upsert=True)
     except errors.ValidationError:
         print(traceback.format_exc())

@@ -1,14 +1,24 @@
+import json
 import os
 import traceback
+import urllib.request
 from argparse import Namespace
 from typing import List
 
+from ftplib import FTP
 import pandas as pd
-from mongoengine import Document, StringField, ListField, errors, ReferenceField, queryset_manager, QuerySet
+from mongoengine import Document, StringField, ListField, errors, ReferenceField, queryset_manager, QuerySet, FileField, \
+    GridFSProxy, EmbeddedDocument, EmbeddedDocumentListField
 
 from . import dataset, species
 from .result import Result
 from ..utils.config import _options
+
+
+class RawFile(EmbeddedDocument):
+    url = StringField(max_length=200, primary_key=True)
+    name = StringField(max_length=200)
+    file = FileField()
 
 
 class Sample(Document):
@@ -27,7 +37,7 @@ class Sample(Document):
     """
     run_accession = StringField(max_length=200, unique=True)
     download_urls = ListField(StringField(max_length=200))
-    raw_data = StringField(max_length=200)
+    raw_data = EmbeddedDocumentListField(RawFile)
     cooked_data = ListField(ReferenceField('Result'))
     phenotypes = ListField(ReferenceField('Phenotype'))
     dataset = ReferenceField('Dataset', required=True)
@@ -41,7 +51,7 @@ class Sample(Document):
 
         :param species_name: name of the species
         :param dataset_name: name of the dataset
-    """
+        """
         data = _options(queryset, species_name, dataset_name)
         df = pd.DataFrame()
         for d in data:
@@ -57,7 +67,7 @@ class Sample(Document):
 
         :param species_name: name of the species
         :param dataset_name: name of the dataset
-    """
+        """
         data = _options(queryset, species_name, dataset_name)
         df = pd.DataFrame()
         for d in data:
@@ -73,7 +83,7 @@ class Sample(Document):
 
         :param species_name: name of the species
         :param dataset_name: name of the dataset
-    """
+        """
         data = _options(queryset, species_name, dataset_name)
         df = pd.DataFrame()
         for d in data:
@@ -92,7 +102,7 @@ class Sample(Document):
         :param date: date when the results have been collected
         :param parameters: bioinformatic tool parameters
         :param raw_result_path: path to the local output file
-    """
+        """
         s = Sample.objects(pk=run_accession).first()
         Result.objects(tool=tool, version=version, parameters=parameters). \
             update_one(set__tool=tool, set__version=version,
@@ -102,8 +112,46 @@ class Sample(Document):
             r.raw_result.replace(fd, content_type='text')
         r.save()
         s.update(add_to_set__cooked_data__=r)
-        # s = Sample.objects(run_accession=sample_id).first()
-        # q = s.cooked_data[0].raw_result.read()
+
+    @staticmethod
+    def download_raw_data(species_name: str = None, dataset_name: str = None):
+        """
+        Download raw data
+
+        :param species_name: name of the species
+        :param dataset_name: name of the dataset
+        """
+        data = Sample.get_download_urls(species_name, dataset_name)
+        root_path = "./.tmp/dbgen/raw/"
+        if not os.path.exists(root_path):
+            os.makedirs(root_path)
+
+        data = data.iloc[:2]
+        for k, v in data.iterrows():
+            for url in v["url"]:
+                local_file = os.path.join(root_path, url)
+                local_dir = os.path.join(*local_file.split("/")[:-1])
+                if not os.path.isdir(local_dir):
+                    os.makedirs(local_dir)
+
+                remote_file = os.path.join("ftp://", url)
+                if not os.path.isfile(local_file):
+                    urllib.request.urlretrieve(remote_file, local_file)
+
+                s = Sample.objects(pk=k).first()
+                is_present = False
+                for f in s.raw_data:
+                    if f.url == url:
+                        is_present = True
+                        break
+
+                if not is_present:
+                    r = RawFile()
+                    r.url = url
+                    r.name = url.split("/")[-1]
+                    with open(local_file, 'rb') as fd:
+                        r.file.put(fd)
+                    s.update(add_to_set__raw_data__=r, upsert=True)
 
 
 def _to_df_results(s: Sample):
@@ -111,53 +159,47 @@ def _to_df_results(s: Sample):
     for result in s.cooked_data:
         d = {s.pk: (s.run_accession, s.species.name, s.dataset.name,
                     result.tool, result.version, result.date, result.parameters, result.raw_result)}
-        df = pd.DataFrame.from_dict(d, orient="index", columns=["run_accession", "species", "dataset",
-                                                                "tool", "version", "date", "parameters", "raw_result"])
+        df = pd.DataFrame.from_dict(d, orient="index", columns=["run accession", "species", "dataset",
+                                                                "tool", "version", "date", "parameters", "raw result"])
         df_results = df_results.append(df)
     return df_results
 
 
 def _to_df_raw(s: Sample):
     d = {s.pk: (s.run_accession, s.species.name, s.dataset.name, s.raw_data)}
-    df = pd.DataFrame.from_dict(d, orient="index", columns=["run_accession", "species", "dataset", "fastq_dir"])
+    df = pd.DataFrame.from_dict(d, orient="index", columns=["run accession", "species", "dataset", "raw data"])
     return df
 
 
 def _to_df_url(s: Sample):
     d = {s.pk: (s.run_accession, s.species.name, s.dataset.name, s.download_urls)}
-    df = pd.DataFrame.from_dict(d, orient="index", columns=["run_accession", "species", "dataset", "url"])
+    df = pd.DataFrame.from_dict(d, orient="index", columns=["run accession", "species", "dataset", "url"])
     return df
 
 
-def import_data(configs: Namespace, dataset_names: List, dataset_years: List, dataset_files: List):
+def import_data(species_name: str, dataset_name: str, dataset_file: str):
     """
-    Import new samples
+    Import dataset
 
     Parameters
     ----------
-    :param configs: configuration parameters
-    :param dataset_names: list of dataset names (e.g. names of the corresponding publications)
-    :param dataset_years: list of publication year
-    :param dataset_files: list of dataset file path
+    :param species_name: species name
+    :param dataset_name: dataset names (e.g. name of the corresponding publication)
+    :param dataset_file: input file path
     """
-    for dname, dyear, dpath in zip(dataset_names, dataset_years, dataset_files):
-        df = pd.read_csv(dpath, sep="\t")
-        df.dropna(axis=0, inplace=True, how="all")
-        for _, row in df.iterrows():
-            run_accession = row[2]
-            download_urls = row[1].split(";")
-            base_id = run_accession[:6]
-            source = row[0]
-            raw_data = os.path.join(configs.fastq_dir, source, base_id, run_accession)
-            try:
-                sp = species.Species.objects(name=configs.species).first()
-                dt = dataset.Dataset.objects(name=dname).first()
-                Sample.objects(run_accession=run_accession). \
-                    update_one(set__run_accession=run_accession, set__download_urls=download_urls,
-                               set__species=sp, set__dataset=dt, set__raw_data=raw_data,
-                               upsert=True)
-                s = Sample.objects(run_accession=run_accession).first()
-                dataset.Dataset.objects(name=dname).update(add_to_set__samples__=s)
-            except errors.ValidationError:
-                continue
-                # print(traceback.format_exc())
+    df = pd.read_csv(dataset_file, sep="\t")
+    df.dropna(axis=0, inplace=True, how="all")
+    for _, row in df.iterrows():
+        run_accession = row[2]
+        download_urls = row[1].split(";")
+        try:
+            sp = species.Species.objects(name=species_name).first()
+            dt = dataset.Dataset.objects(name=dataset_name).first()
+            Sample.objects(run_accession=run_accession). \
+                update_one(set__run_accession=run_accession, set__download_urls=download_urls,
+                           set__species=sp, set__dataset=dt, upsert=True)
+            s = Sample.objects(run_accession=run_accession).first()
+            dataset.Dataset.objects(name=dataset_name).update(add_to_set__samples__=s)
+        except errors.ValidationError:
+            continue
+            # print(traceback.format_exc())

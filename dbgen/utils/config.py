@@ -16,12 +16,12 @@ def _load_configuration() -> argparse.Namespace:
     """
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-p", "--password", help="Password for running mongo.", required=False)
-    parser.add_argument("-s", "--species", help="Species name.", required=False, default="Species 1")
-    parser.add_argument("--species-dir", help="Species directory.", required=False, default="./test/data/species1")
-    parser.add_argument("-f", "--fastq-dir", help="Root directory where fastq sample files will be stored.",
-                        required=False, default="./test/data/db/raw")
-    parser.add_argument("-d", "--dataset", help="Dataset to add.", required=False, default="all")
+    parser.add_argument("-p", "--password", help="Password to access the DB service.", required=False)
+    parser.add_argument("--database", help="Database name.", required=False, default="dbgen_test")
+    parser.add_argument("--host", help="Host.", required=False, default="localhost")
+    parser.add_argument("--port", help="Port.", required=False, default=27017)
+    parser.add_argument("-r", "--root-data-dir", help="Root directory for input data.",
+                        required=False, default="./test/data/")
     args = parser.parse_args()
 
     return args

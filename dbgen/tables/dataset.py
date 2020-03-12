@@ -25,21 +25,19 @@ class Dataset(Document):
     samples = ListField(ReferenceField(sample.Sample))
 
 
-def import_data(configs: Namespace, dataset_names: List, dataset_years: List, dataset_files: List):
+def import_data(species_name: str, dataset_name: str, dataset_year: str):
     """
-    Import new datasets
+    Import dataset
 
     Parameters
     ----------
-    :param configs: configuration parameters
-    :param dataset_names: list of dataset names (e.g. names of the corresponding publications)
-    :param dataset_years: list of publication year
-    :param dataset_files: list of dataset file path
+    :param species_name: species name
+    :param dataset_name: dataset names (e.g. name of the corresponding publication)
+    :param dataset_year: publication year
     """
-    for dname, dyear, dpath in zip(dataset_names, dataset_years, dataset_files):
-        try:
-            Dataset.objects(name=dname).update_one(set__name=dname, set__year=dyear, upsert=True)
-            d = Dataset.objects(name=dname).first()
-            species.Species.objects(name=configs.species).update(add_to_set__datasets__=d)
-        except errors.ValidationError:
-            print(traceback.format_exc())
+    try:
+        Dataset.objects(name=dataset_name).update_one(set__name=dataset_name, set__year=dataset_year, upsert=True)
+        d = Dataset.objects(name=dataset_name).first()
+        species.Species.objects(name=species_name).update(add_to_set__datasets__=d)
+    except errors.ValidationError:
+        print(traceback.format_exc())

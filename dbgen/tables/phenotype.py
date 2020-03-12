@@ -68,34 +68,32 @@ def _to_df(ph: Phenotype):
     return df
 
 
-def import_data(configs: Namespace, dataset_names: List, dataset_years: List, dataset_files: List):
+def import_data(species_name: str, dataset_name: str, dataset_file: str):
     """
-    Import new phenotypes
+    Import dataset
 
     Parameters
     ----------
-    :param configs: configuration parameters
-    :param dataset_names: list of dataset names (e.g. names of the corresponding publications)
-    :param dataset_years: list of publication year
-    :param dataset_files: list of dataset file path
+    :param species_name: species name
+    :param dataset_name: dataset names (e.g. name of the corresponding publication)
+    :param dataset_file: input file path
     """
-    for dname, dyear, dpath in zip(dataset_names, dataset_years, dataset_files):
-        df = pd.read_csv(dpath, sep="\t")
-        df.dropna(axis=0, inplace=True, how="all")
-        for _, row in df.iterrows():
-            run_accession = row[2]
-            for pname, phenotype in row.items():
-                if pname not in ["ENA project", "Fastq reads", "Run accession"]:
-                    try:
-                        s = sample.Sample.objects(run_accession=run_accession).first()
-                        sp = species.Species.objects(name=configs.species).first()
-                        dt = dataset.Dataset.objects(name=dname).first()
-                        Phenotype.objects(sample=s, name=pname). \
-                            update_one(set__name=pname, set__phenotype=phenotype,
-                                       set__sample=s, set__species=sp,
-                                       set__dataset=dt, upsert=True)
-                        p = Phenotype.objects(sample=s, name=pname).first()
-                        sample.Sample.objects(run_accession=run_accession).update(add_to_set__phenotypes__=p)
-                    except errors.ValidationError:
-                        continue
-                        # print(traceback.format_exc())
+    df = pd.read_csv(dataset_file, sep="\t")
+    df.dropna(axis=0, inplace=True, how="all")
+    for _, row in df.iterrows():
+        run_accession = row[2]
+        for pname, phenotype in row.items():
+            if pname not in ["ENA project", "Fastq reads", "Run accession"]:
+                try:
+                    s = sample.Sample.objects(run_accession=run_accession).first()
+                    sp = species.Species.objects(name=species_name).first()
+                    dt = dataset.Dataset.objects(name=dataset_name).first()
+                    Phenotype.objects(sample=s, name=pname). \
+                        update_one(set__name=pname, set__phenotype=phenotype,
+                                   set__sample=s, set__species=sp,
+                                   set__dataset=dt, upsert=True)
+                    p = Phenotype.objects(sample=s, name=pname).first()
+                    sample.Sample.objects(run_accession=run_accession).update(add_to_set__phenotypes__=p)
+                except errors.ValidationError:
+                    continue
+                    # print(traceback.format_exc())
