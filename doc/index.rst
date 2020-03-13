@@ -1,5 +1,5 @@
-Welcome to DBGen
-===================
+DBGen - General purpose database for genomic data analysis
+=============================================================
 
 
 |Build|
@@ -30,10 +30,11 @@ Welcome to DBGen
     :target: https://pypi.python.org/pypi/dbgen/
 
 
-DBGen is a python package providing general purpose database
+DBGen is a python package providing a general purpose database
 to support genomic data analysis studies.
 
 The current implementation is based on mongoDB.
+
 
 Quick start
 -----------
