@@ -56,7 +56,7 @@ Documentation
 --------------
 
 Documentation for the
-`latest stable version <https://lazygrid.readthedocs.io/en/latest/>`__
+`latest stable version <https://dbgen.readthedocs.io/en/latest/>`__
 is available on ReadTheDocs.
 
 
@@ -80,7 +80,7 @@ Contributing
 ------------
 
 Please read the
-`contributing section <https://github.com/pietrobarbiero/dbgen/doc/user_guide/contributing.rst>`__
+`contributing section <https://github.com/pietrobarbiero/dbgen/blob/master/doc/user_guide/contributing.rst>`__
 for details on our code of conduct, and the process for submitting pull requests to us.
 
 

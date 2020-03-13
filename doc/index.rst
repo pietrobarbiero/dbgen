@@ -12,15 +12,15 @@ DBGen - General purpose database for genomic data analysis
 
 .. |Build| image:: https://img.shields.io/travis/pietrobarbiero/dbgen?label=Master%20Build&style=for-the-badge
     :alt: Travis (.org)
-    :target: https://travis-ci.org/glubbdubdrib/lazygrid
+    :target: https://travis-ci.org/pietrobarbiero/dbgen
 
 .. |Coverage| image:: https://img.shields.io/codecov/c/gh/pietrobarbiero/dbgen?label=Test%20Coverage&style=for-the-badge
     :alt: Codecov
-    :target: https://codecov.io/gh/glubbdubdrib/lazygrid
+    :target: https://codecov.io/gh/pietrobarbiero/dbgen
 
 .. |Docs| image:: https://img.shields.io/readthedocs/pietrobarbiero/dbgen?style=for-the-badge
     :alt: Read the Docs (version)
-    :target: https://lazygrid.readthedocs.io/en/latest/
+    :target: https://dbgen.readthedocs.io/en/latest/
 
 .. |PyPI license| image:: https://img.shields.io/pypi/l/dbgen.svg?style=for-the-badge
    :target: https://pypi.python.org/pypi/dbgen/
@@ -28,6 +28,7 @@ DBGen - General purpose database for genomic data analysis
 .. |PyPI-version| image:: https://img.shields.io/pypi/v/dbgen?style=for-the-badge
     :alt: PyPI
     :target: https://pypi.python.org/pypi/dbgen/
+
 
 
 DBGen is a python package providing a general purpose database
