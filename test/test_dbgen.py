@@ -81,17 +81,6 @@ class Test(unittest.TestCase):
 
         return
 
-    def test_start_mongo(self):
-        import dbgen
-        import sys
-
-        sys.argv.extend(["-p", "test"])
-        configs = dbgen.load_cfg()
-        dbgen.start_db(configs)
-        dbgen.shutdown_db(configs)
-
-        return
-
 
 if __name__ == '__main__':
     unittest.main()
