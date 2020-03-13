@@ -29,15 +29,15 @@ class Test(unittest.TestCase):
                                             dataset_name="2009_AuthorName3",
                                             phenotype_name="Mupirocin")
 
-        dbgen.Sample.download_raw_data(species_name="species2", dataset_name="2009_AuthorName3")
-
-        s1 = dbgen.Sample.get_raw_data(species_name="species2", dataset_name="2009_AuthorName3")
-        s2 = dbgen.Sample.get_raw_data(dataset_name="2009_AuthorName3")
-        s3 = dbgen.Sample.get_raw_data(species_name="species2")
-        raw_data_files1 = [f.name for f in s1.iloc[0, -1]]
-        raw_data_files2 = [f.name for f in s1.iloc[1, -1]]
-        self.assertTrue(raw_data_files1 == ['ERR410034_1.fastq.gz', 'ERR410034_2.fastq.gz'])
-        self.assertTrue(raw_data_files2 == ['ERR410035_1.fastq.gz', 'ERR410035_2.fastq.gz'])
+        # dbgen.Sample.download_raw_data(species_name="species2", dataset_name="2009_AuthorName3")
+        #
+        # s1 = dbgen.Sample.get_raw_data(species_name="species2", dataset_name="2009_AuthorName3")
+        # s2 = dbgen.Sample.get_raw_data(dataset_name="2009_AuthorName3")
+        # s3 = dbgen.Sample.get_raw_data(species_name="species2")
+        # raw_data_files1 = [f.name for f in s1.iloc[0, -1]]
+        # raw_data_files2 = [f.name for f in s1.iloc[1, -1]]
+        # self.assertTrue(raw_data_files1 == ['ERR410034_1.fastq.gz', 'ERR410034_2.fastq.gz'])
+        # self.assertTrue(raw_data_files2 == ['ERR410035_1.fastq.gz', 'ERR410035_2.fastq.gz'])
 
         root_path = "./test/db/cooked/"
         if not os.path.exists(root_path):
