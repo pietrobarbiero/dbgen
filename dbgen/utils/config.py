@@ -27,38 +27,38 @@ def _load_configuration() -> argparse.Namespace:
     return args
 
 
-def _options(queryset: QuerySet, species_name: str = None, dataset_name: str = None, phenotype_name: str = None):
+def _options(queryset: QuerySet, species_name: str = None, dataset_name: str = None, pheno_or_tool_name: str = None):
     """
     Filter query according to the provided parameters
 
     :param queryset: current objects to be filtered
     :param species_name: species name
     :param dataset_name: dataset name
-    :param phenotype_name: phenotype name
+    :param pheno_or_tool_name: phenotype name
     """
-    if species_name and phenotype_name and dataset_name:
+    if species_name and pheno_or_tool_name and dataset_name:
         s = species.Species.objects(name=species_name).first()
         d = dataset.Dataset.objects(name=dataset_name).first()
-        data = queryset.filter(species=s, dataset=d, name=phenotype_name)
+        data = queryset.filter(species=s, dataset=d, name=pheno_or_tool_name)
 
-    elif species_name and dataset_name and (not phenotype_name):
+    elif species_name and dataset_name and (not pheno_or_tool_name):
         s = species.Species.objects(name=species_name).first()
         d = dataset.Dataset.objects(name=dataset_name).first()
         data = queryset.filter(species=s, dataset=d)
 
-    elif (not species_name) and phenotype_name and dataset_name:
+    elif (not species_name) and pheno_or_tool_name and dataset_name:
         d = dataset.Dataset.objects(name=dataset_name).first()
-        data = queryset.filter(dataset=d, name=phenotype_name)
+        data = queryset.filter(dataset=d, name=pheno_or_tool_name)
 
-    elif species_name and phenotype_name and (not dataset_name):
+    elif species_name and pheno_or_tool_name and (not dataset_name):
         s = species.Species.objects(name=species_name).first()
-        data = queryset.filter(species=s, name=phenotype_name)
+        data = queryset.filter(species=s, name=pheno_or_tool_name)
 
-    elif species_name and (not phenotype_name) and (not dataset_name):
+    elif species_name and (not pheno_or_tool_name) and (not dataset_name):
         s = species.Species.objects(name=species_name).first()
         data = queryset.filter(species=s)
 
-    elif dataset_name and (not phenotype_name) and (not species_name):
+    elif dataset_name and (not pheno_or_tool_name) and (not species_name):
         d = dataset.Dataset.objects(name=dataset_name).first()
         data = queryset.filter(dataset=d)
 

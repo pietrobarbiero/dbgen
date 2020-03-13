@@ -21,9 +21,9 @@ class Phenotype(Document):
     ----------
     :param name: name (e.g. substance name or phenotype name)
     :param phenotype: corresponding phenotype (e.g. resistant/susceptible to a substance)
-    :param sample: reference the corresponding sample
-    :param dataset: reference the corresponding dataset
-    :param species: reference the corresponding species
+    :param sample: reference to the corresponding sample
+    :param dataset: reference to the corresponding dataset
+    :param species: reference to the corresponding species
     """
     name = StringField(max_length=200, required=True, unique_with='sample')
     phenotype = StringField(max_length=3, required=True, choices=PHENOTYPE)
@@ -40,7 +40,7 @@ class Phenotype(Document):
         :param species_name: name of the species
         :param dataset_name: name of the dataset
         :param phenotype_name: name of the phenotype
-    """
+        """
         data = _options(queryset, species_name, dataset_name, phenotype_name)
         df = pd.DataFrame()
         for d in data:
@@ -49,13 +49,14 @@ class Phenotype(Document):
         return df
 
     @queryset_manager
-    def get_phenotype_names(doc_cls, queryset: QuerySet, species_name=None) -> Set:
+    def get_phenotype_names(doc_cls, queryset: QuerySet, species_name=None, dataset_name=None) -> Set:
         """
-        Get all phenotype names available for a specific species
+        Get all phenotype names available
 
         :param species_name: name of the species
-    """
-        data = _options(queryset, species_name)
+        :param dataset_name: name of the dataset
+        """
+        data = _options(queryset, species_name, dataset_name)
         names = set()
         for d in data:
             names.add(d.name)
@@ -81,11 +82,12 @@ def import_data(species_name: str, dataset_name: str, dataset_file: str):
     df = pd.read_csv(dataset_file, sep="\t")
     df.dropna(axis=0, inplace=True, how="all")
     for _, row in df.iterrows():
+        project = row[0]
         run_accession = row[2]
-        for pname, phenotype in row.items():
-            if pname not in ["ENA project", "Fastq reads", "Run accession"]:
+        for i, (pname, phenotype) in enumerate(row.items()):
+            if i > 2:
                 try:
-                    s = sample.Sample.objects(run_accession=run_accession).first()
+                    s = sample.Sample.objects(project=project, run_accession=run_accession).first()
                     sp = species.Species.objects(name=species_name).first()
                     dt = dataset.Dataset.objects(name=dataset_name).first()
                     Phenotype.objects(sample=s, name=pname). \
@@ -93,7 +95,7 @@ def import_data(species_name: str, dataset_name: str, dataset_file: str):
                                    set__sample=s, set__species=sp,
                                    set__dataset=dt, upsert=True)
                     p = Phenotype.objects(sample=s, name=pname).first()
-                    sample.Sample.objects(run_accession=run_accession).update(add_to_set__phenotypes__=p)
+                    sample.Sample.objects(project=project, run_accession=run_accession).update(add_to_set__phenotypes__=p)
                 except errors.ValidationError:
                     continue
                     # print(traceback.format_exc())
